@@ -5,6 +5,15 @@ let transactions = JSON.parse(localStorage.getItem('nexus_ledger')) || [
     { id: 3, title: 'Client Lunch Layout', amount: 65.20, type: 'expense', category: 'Food', date: '2026-05-14' }
 ];
 
+// Budget limit parameters configuration memory footprint
+let budgetLimits = JSON.parse(localStorage.getItem('nexus_limits')) || {
+    Shopping: 1000,
+    Food: 500,
+    Rent: 1500,
+    Entertainment: 300,
+    Misc: 500
+};
+
 let categoryChart = null;
 
 // Registry Bindings
@@ -62,20 +71,38 @@ function processFinancialTelemetry() {
     refreshFintechCharts(categoryDistribution);
 }
 
-// Limits Progress Processor
+// Dynamic Limits Progress Component Renderer
 function updateBudgetProgressBars(distributionData) {
-    const limits = { Shopping: 1000, Food: 500 };
-    
-    Object.keys(limits).forEach(categoryKey => {
+    const container = document.getElementById('budgetBarsContainer');
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Loop through limits to create matching view parameters
+    Object.keys(budgetLimits).forEach(categoryKey => {
         const spent = distributionData[categoryKey] || 0;
-        const limitMax = limits[categoryKey];
+        const limitMax = budgetLimits[categoryKey];
         const percentage = Math.min((spent / limitMax) * 100, 100);
 
-        const textElement = document.getElementById(`budgetProgressText-${categoryKey}`);
-        const barElement = document.getElementById(`budgetProgressBar-${categoryKey}`);
+        // Determine critical alert styling metrics classes
+        let trackColor = 'bg-indigo-600';
+        if (percentage >= 90) {
+            trackColor = 'bg-rose-500';
+        } else if (percentage >= 75) {
+            trackColor = 'bg-amber-500';
+        }
 
-        if(textElement) textElement.innerText = `$${spent.toFixed(2)} / $${limitMax.toFixed(2)}`;
-        if(barElement) barElement.style.width = `${percentage}%`;
+        const barMarkup = `
+            <div>
+                <div class="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    <span>${categoryKey === 'Rent' ? '🏠 Rent & Utilities' : categoryKey}</span>
+                    <span class="text-slate-700 font-semibold">$${spent.toFixed(2)} / $${parseFloat(limitMax).toFixed(2)}</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-500 ${trackColor}" style="width: ${percentage}%"></div>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', barMarkup);
     });
 }
 
@@ -187,6 +214,23 @@ transactionForm.addEventListener('submit', (e) => {
     closeModal();
 });
 
+// Target limits form tracking observer
+const budgetForm = document.getElementById('budgetForm');
+if (budgetForm) {
+    budgetForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const categorySelection = document.getElementById('budgetCategory').value;
+        const maximumThreshold = parseFloat(document.getElementById('budgetAmount').value);
+
+        if (maximumThreshold > 0) {
+            budgetLimits[categorySelection] = maximumThreshold;
+            localStorage.setItem('nexus_limits', JSON.stringify(budgetLimits));
+            processFinancialTelemetry();
+            budgetForm.reset();
+        }
+    });
+}
+
 window.wipeRecord = function(id) {
     transactions = transactions.filter(t => t.id !== id);
     commitState();
@@ -211,7 +255,7 @@ const pageSubtitle = document.getElementById('pageSubtitle');
 const pageMeta = {
     dashboard: { title: "Financial Overview", subtitle: "Live monitoring structural balance telemetry values." },
     transactions: { title: "Operations Ledger", subtitle: "Deep-history indexing parameters of all active ledger accounts." },
-    budgets: { title: "System Thresholds", subtitle: "Adjust performance caps and execution parameter boundaries." },
+    budgets: { title: "Limits & Goals", subtitle: "Adjust performance caps and execution parameter boundaries." },
     settings: { title: "Nexus Parameters", subtitle: "Configure interface configurations and clear system state nodes." }
 };
 
