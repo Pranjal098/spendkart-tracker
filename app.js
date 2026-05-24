@@ -30,8 +30,33 @@ const transactionTableBody = document.getElementById('transactionTableBody');
 const transactionForm = document.getElementById('transactionForm');
 const modalOverlay = document.getElementById('modalOverlay');
 
+// Decoupled Dropdown Content Generator (Renders elements independently safely)
+function renderCategoryDropdowns() {
+    const txSelect = document.getElementById('txCategory');
+    const budgetSelect = document.getElementById('budgetCategory');
+    
+    if (txSelect) {
+        txSelect.innerHTML = '';
+        customCategories.forEach(cat => {
+            const option = `<option value="${cat}">${cat === 'Rent' ? 'Rent & Utilities' : cat}</option>`;
+            txSelect.insertAdjacentHTML('beforeend', option);
+        });
+    }
+
+    if (budgetSelect) {
+        budgetSelect.innerHTML = '';
+        customCategories.forEach(cat => {
+            if (cat !== 'Salary') {
+                const option = `<option value="${cat}">${cat === 'Rent' ? 'Rent & Utilities' : cat}</option>`;
+                budgetSelect.insertAdjacentHTML('beforeend', option);
+            }
+        });
+    }
+}
+
 // Modal Control Interceptors
 document.getElementById('openModalBtn').addEventListener('click', () => {
+    renderCategoryDropdowns(); // Safety Guard: Force immediate dropdown rendering on click
     modalOverlay.classList.remove('hidden');
     setTimeout(() => modalOverlay.classList.add('active'), 10);
     document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
@@ -42,27 +67,8 @@ function closeModal() {
     setTimeout(() => modalOverlay.classList.add('hidden'), 300);
     transactionForm.reset();
 }
-document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-
-// Dropdown Content Generator
-function renderCategoryDropdowns() {
-    const txSelect = document.getElementById('txCategory');
-    const budgetSelect = document.getElementById('budgetCategory');
-    
-    if (!txSelect || !budgetSelect) return;
-
-    txSelect.innerHTML = '';
-    budgetSelect.innerHTML = '';
-
-    customCategories.forEach(cat => {
-        const option = `<option value="${cat}">${cat === 'Rent' ? 'Rent & Utilities' : cat}</option>`;
-        txSelect.insertAdjacentHTML('beforeend', option);
-        
-        // Exclude revenue categories from structural spending constraints form
-        if (cat !== 'Salary') {
-            budgetSelect.insertAdjacentHTML('beforeend', option);
-        }
-    });
+if(document.getElementById('closeModalBtn')) {
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
 }
 
 // Computational Analytics Engine
@@ -70,7 +76,6 @@ function processFinancialTelemetry() {
     let incomeSum = 0;
     let expenseSum = 0;
     
-    // Dynamically initialize counters based on category mapping state
     let categoryDistribution = {};
     customCategories.forEach(c => categoryDistribution[c] = 0);
 
@@ -91,7 +96,6 @@ function processFinancialTelemetry() {
 
     const totalNetBalance = incomeSum - expenseSum;
 
-    // Direct UI Strings Render
     if(totalBalanceEl) totalBalanceEl.innerText = `$${totalNetBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     if(cardBalanceDisplay) cardBalanceDisplay.innerText = `$${totalNetBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     if(totalIncomeEl) totalIncomeEl.innerText = `$${incomeSum.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
@@ -101,15 +105,12 @@ function processFinancialTelemetry() {
     refreshFintechCharts(categoryDistribution);
 }
 
-// Dynamic Limits Progress Component Renderer
 function updateBudgetProgressBars(distributionData) {
     const container = document.getElementById('budgetBarsContainer');
     if (!container) return;
     container.innerHTML = '';
 
-    // Loop through limits to create matching view parameters
     Object.keys(budgetLimits).forEach(categoryKey => {
-        // Skip rendering if category has been custom deleted or doesn't map out
         if (!customCategories.includes(categoryKey) || categoryKey === 'Salary') return;
 
         const spent = distributionData[categoryKey] || 0;
@@ -171,17 +172,14 @@ function renderTransactionHistoryLogs() {
         `;
         transactionTableBody.appendChild(tr);
     });
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
 }
 
-// Fintech Chart Rendering (Line Graph Style — Dynamic Extraction)
 function refreshFintechCharts(distributionData) {
     const canvas = document.getElementById('categoryChart');
     if(!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    
-    // Filter out Salary revenue vector out of expenditure graphs line maps
     const chartLabels = customCategories.filter(c => c !== 'Salary');
     const dataPoints = chartLabels.map(label => distributionData[label] || 0);
 
@@ -219,7 +217,6 @@ function refreshFintechCharts(distributionData) {
     });
 }
 
-// Quick Actions Handler
 window.quickTransfer = function(targetName, defaultAmount) {
     const confirmation = confirm(`Authorize instant quick transfer node of $${defaultAmount} to ${targetName}?`);
     if (!confirmation) return;
@@ -249,7 +246,6 @@ transactionForm.addEventListener('submit', (e) => {
     closeModal();
 });
 
-// Target limits form tracking observer
 const budgetForm = document.getElementById('budgetForm');
 if (budgetForm) {
     budgetForm.addEventListener('submit', (e) => {
@@ -266,7 +262,6 @@ if (budgetForm) {
     });
 }
 
-// CATEGORY REGISTRY LOGIC COUPLING OBSERVER
 const categoryForm = document.getElementById('categoryForm');
 if (categoryForm) {
     categoryForm.addEventListener('submit', (e) => {
@@ -274,10 +269,8 @@ if (categoryForm) {
         const inputEl = document.getElementById('newCategoryName');
         const nodeName = inputEl.value.trim();
 
-        // Prevent duplicate nodes tracking failures inside arrays
         if (nodeName && !customCategories.includes(nodeName)) {
             customCategories.push(nodeName);
-            // Assign baseline constraint threshold for the new node vector parameters
             budgetLimits[nodeName] = 500; 
 
             localStorage.setItem('nexus_categories', JSON.stringify(customCategories));
@@ -286,9 +279,9 @@ if (categoryForm) {
             renderCategoryDropdowns();
             processFinancialTelemetry();
             categoryForm.reset();
-            alert(`Category Node "${nodeName}" deployed successfully to the ledger configuration matrices!`);
+            alert(`Category Node "${nodeName}" deployed successfully!`);
         } else {
-            alert("Node parameters allocation failure: Category node already configured.");
+            alert("Configuration failure: Node name empty or already configured.");
         }
     });
 }
@@ -308,7 +301,7 @@ function escapeHtml(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
-// Single Page Tab Navigation Route Execution
+// SPA Routing Logic
 const navLinks = document.querySelectorAll('.nav-link');
 const tabContents = document.querySelectorAll('.tab-content');
 const pageTitle = document.getElementById('pageTitle');
@@ -343,9 +336,16 @@ navLinks.forEach(link => {
     });
 });
 
-// Boot Initializer Hook
-document.addEventListener('DOMContentLoaded', () => {
+// Deterministic Boot Execution Lifecycle Engine
+function bootstrapApplication() {
+    if (window.lucide) lucide.createIcons();
     renderCategoryDropdowns();
     processFinancialTelemetry();
     renderTransactionHistoryLogs();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrapApplication);
+} else {
+    bootstrapApplication();
+}
