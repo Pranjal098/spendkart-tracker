@@ -44,7 +44,7 @@
             </div>
         </aside>
 
-        <main class="flex-1 overflow-y-auto p-8 max-sm:p-4 window-wrapper flex flex-col justify-between">
+        <main class="flex-1 overflow-y-auto p-8 max-sm:p-4 flex flex-col justify-between">
             
             <header class="flex justify-between items-center mb-8">
                 <div>
@@ -86,7 +86,7 @@
                             <div class="flex justify-between items-center mb-6">
                                 <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Cashflow Analytics Matrix</h4>
                                 <div class="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                                    <span class="w-2 h-2 rounded-full bg-indigo-600"></span> Allocation Weighting active
+                                    <span class="w-2 h-2 rounded-full bg-indigo-600"></span> Dynamic Registry tracking active
                                 </div>
                             </div>
                             <div class="h-[280px] flex items-center justify-center">
@@ -173,12 +173,7 @@
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Select Category Node</label>
                                 <select id="budgetCategory" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-hidden focus:border-indigo-500 transition">
-                                    <option value="Shopping">Shopping</option>
-                                    <option value="Food">Food</option>
-                                    <option value="Rent">Rent & Utilities</option>
-                                    <option value="Entertainment">Entertainment</option>
-                                    <option value="Misc">Miscellaneous</option>
-                                </select>
+                                    </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Maximum Limit Threshold ($)</label>
@@ -200,7 +195,21 @@
                 </div>
             </div>
 
-            <div id="tab-settings" class="tab-content hidden flex-1">
+            <div id="tab-settings" class="tab-content hidden flex-1 space-y-6">
+                
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs max-w-2xl space-y-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 uppercase tracking-wider">Create Custom Category Node</h3>
+                        <p class="text-sm text-slate-400 mt-0.5">Append custom transaction categories dynamically directly to the system database.</p>
+                    </div>
+                    <form id="categoryForm" class="flex gap-3 max-sm:flex-col">
+                        <input type="text" id="newCategoryName" required placeholder="e.g., Subscriptions, Medical, Crypto" class="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:border-indigo-500 transition">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition cursor-pointer whitespace-nowrap">
+                            Deploy Node
+                        </button>
+                    </form>
+                </div>
+
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs max-w-2xl space-y-6">
                     <div>
                         <h3 class="text-base font-bold text-slate-900 uppercase tracking-wider">Nexus Module Options</h3>
@@ -210,7 +219,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-sm font-semibold text-slate-800">Reset Local Memory Matrix</p>
-                            <p class="text-xs text-slate-400">Wipe all data points recorded via browser storage parameters.</p>
+                            <p class="text-xs text-slate-400">Wipe all array data points recorded via browser storage parameters.</p>
                         </div>
                         <button onclick="localStorage.clear(); location.reload();" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs px-4 py-2.5 rounded-xl transition cursor-pointer">
                             Clear Active Cache
@@ -253,13 +262,7 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Category Node</label>
                         <select id="txCategory" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-hidden focus:border-indigo-500 transition">
-                            <option value="Shopping">Shopping</option>
-                            <option value="Food">Food</option>
-                            <option value="Rent">Rent & Utilities</option>
-                            <option value="Entertainment">Entertainment</option>
-                            <option value="Salary">Salary Revenue</option>
-                            <option value="Misc">Miscellaneous</option>
-                        </select>
+                            </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Calendar Date</label>
