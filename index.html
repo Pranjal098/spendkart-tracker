@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpendKart — Personal Finance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#F8FAFC] text-[#1E293B] font-sans antialiased">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <aside class="w-64 bg-white border-r border-[#E2E8F0] flex flex-col justify-between p-6 max-md:hidden">
+            <div>
+                <div class="flex items-center gap-3 px-2 py-4">
+                    <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-md shadow-indigo-200">
+                        <i data-lucide="wallet" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">SpendKart</span>
+                </div>
+                
+                <nav class="mt-8 space-y-1">
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold bg-indigo-50 text-indigo-600 rounded-xl transition">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-800 rounded-xl transition">
+                        <i data-lucide="arrow-left-right" class="w-5 h-5"></i> Transactions
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-800 rounded-xl transition">
+                        <i data-lucide="pie-chart" class="w-5 h-5"></i> Budgets
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-800 rounded-xl transition">
+                        <i data-lucide="settings" class="w-5 h-5"></i> Settings
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Premium Access</p>
+                <p class="text-sm font-bold mt-1 text-slate-800">Unlock Advanced Insights</p>
+                <button class="w-full mt-3 bg-slate-900 text-white text-xs font-semibold py-2.5 rounded-xl hover:bg-slate-800 transition">Upgrade</button>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-8 max-sm:p-4">
+            
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Financial Dashboard</h1>
+                    <p class="text-sm text-slate-500 mt-0.5">Welcome back! Tracking your live spending parameters.</p>
+                </div>
+                <button id="openModalBtn" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-100 transition duration-200">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Add Transaction
+                </button>
+            </header>
+
+            <section class="grid grid-cols-3 gap-6 max-lg:grid-cols-1 mb-8">
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-xl border border-slate-800 relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 text-slate-800 opacity-20">
+                        <i data-lucide="coins" class="w-32 h-32"></i>
+                    </div>
+                    <p class="text-sm text-slate-400 font-medium uppercase tracking-wider">Total Net Balance</p>
+                    <h3 id="totalBalance" class="text-3xl font-extrabold mt-2 tracking-tight">$0.00</h3>
+                    <div class="mt-4 flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg w-fit">
+                        <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Live Sync Active
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-400 font-medium uppercase tracking-wider">Total Revenue</p>
+                        <h3 id="totalIncome" class="text-2xl font-bold text-slate-900 mt-1">$0.00</h3>
+                    </div>
+                    <div class="bg-emerald-50 text-emerald-600 p-3.5 rounded-xl">
+                        <i data-lucide="arrow-up-right" class="w-6 h-6"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-400 font-medium uppercase tracking-wider">Total Expenses</p>
+                        <h3 id="totalExpenses" class="text-2xl font-bold text-slate-900 mt-1">$0.00</h3>
+                    </div>
+                    <div class="bg-rose-50 text-rose-600 p-3.5 rounded-xl">
+                        <i data-lucide="arrow-down-left" class="w-6 h-6"></i>
+                    </div>
+                </div>
+            </section>
+
+            <section class="grid grid-cols-3 gap-6 max-xl:grid-cols-1 mb-8">
+                <div class="col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h4 class="text-base font-bold text-slate-900 mb-4">Expense Categories Matrix</h4>
+                    <div class="h-[280px] flex items-center justify-center">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <h4 class="text-base font-bold text-slate-900 mb-4">Wallet Management Overview</h4>
+                    <div class="space-y-4 flex-1 overflow-y-auto pr-1">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-500 font-medium">🛍️ Shopping Allocation</span>
+                            <span class="font-semibold text-slate-800" id="stat-Shopping">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-500 font-medium">🍔 Food & Dining</span>
+                            <span class="font-semibold text-slate-800" id="stat-Food">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-500 font-medium">🏠 Rent & Utilities</span>
+                            <span class="font-semibold text-slate-800" id="stat-Rent">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-500 font-medium">🎬 Entertainment</span>
+                            <span class="font-semibold text-slate-800" id="stat-Entertainment">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                    <h4 class="text-base font-bold text-slate-900">Recent Transactions History</h4>
+                    <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Stored Locally</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50/70 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                <th class="p-4 pl-6">Title</th>
+                                <th class="p-4">Category</th>
+                                <th class="p-4">Date</th>
+                                <th class="p-4">Type</th>
+                                <th class="p-4 pr-6 text-right">Amount</th>
+                                <th class="p-4 pr-6 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTableBody" class="text-sm font-medium divide-y divide-slate-100">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center hidden opacity-0 transition-opacity duration-300 z-50">
+        <div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl transform scale-95 transition-transform duration-300">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-lg font-bold text-slate-900">Log Transaction</h3>
+                <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <form id="transactionForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Description/Title</label>
+                    <input type="text" id="txTitle" required placeholder="e.g., Nike Sneakers" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Amount ($)</label>
+                        <input type="number" step="0.01" id="txAmount" required placeholder="0.00" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Operation Type</label>
+                        <select id="txType" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-hidden focus:border-indigo-500 transition">
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Category Mapping</label>
+                        <select id="txCategory" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-hidden focus:border-indigo-500 transition">
+                            <option value="Shopping">Shopping</option>
+                            <option value="Food">Food</option>
+                            <option value="Rent">Rent & Utilities</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Salary">Salary Revenue</option>
+                            <option value="Misc">Miscellaneous</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Execution Date</label>
+                        <input type="date" id="txDate" required class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-hidden focus:border-indigo-500 transition">
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3 rounded-xl shadow-lg shadow-indigo-100 transition">
+                    Commit Entry to Ledger
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
