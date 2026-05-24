@@ -1,8 +1,13 @@
-// State Management Engine
+// Local Ledger Database Core
 let transactions = JSON.parse(localStorage.getItem('nexus_ledger')) || [
     { id: 1, title: 'Inflow Injection', amount: 3500.00, type: 'income', category: 'Salary', date: '2026-05-10' },
     { id: 2, title: 'Server Subscriptions', amount: 150.00, type: 'expense', category: 'Rent', date: '2026-05-12' },
     { id: 3, title: 'Client Lunch Layout', amount: 65.20, type: 'expense', category: 'Food', date: '2026-05-14' }
+];
+
+// Dynamic Category Registry Array State
+let customCategories = JSON.parse(localStorage.getItem('nexus_categories')) || [
+    'Shopping', 'Food', 'Rent', 'Entertainment', 'Salary', 'Misc'
 ];
 
 // Budget limit parameters configuration memory footprint
@@ -39,11 +44,35 @@ function closeModal() {
 }
 document.getElementById('closeModalBtn').addEventListener('click', closeModal);
 
+// Dropdown Content Generator
+function renderCategoryDropdowns() {
+    const txSelect = document.getElementById('txCategory');
+    const budgetSelect = document.getElementById('budgetCategory');
+    
+    if (!txSelect || !budgetSelect) return;
+
+    txSelect.innerHTML = '';
+    budgetSelect.innerHTML = '';
+
+    customCategories.forEach(cat => {
+        const option = `<option value="${cat}">${cat === 'Rent' ? 'Rent & Utilities' : cat}</option>`;
+        txSelect.insertAdjacentHTML('beforeend', option);
+        
+        // Exclude revenue categories from structural spending constraints form
+        if (cat !== 'Salary') {
+            budgetSelect.insertAdjacentHTML('beforeend', option);
+        }
+    });
+}
+
 // Computational Analytics Engine
 function processFinancialTelemetry() {
     let incomeSum = 0;
     let expenseSum = 0;
-    let categoryDistribution = { Shopping: 0, Food: 0, Rent: 0, Entertainment: 0, Salary: 0, Misc: 0 };
+    
+    // Dynamically initialize counters based on category mapping state
+    let categoryDistribution = {};
+    customCategories.forEach(c => categoryDistribution[c] = 0);
 
     transactions.forEach(tx => {
         const amt = parseFloat(tx.amount);
@@ -54,6 +83,7 @@ function processFinancialTelemetry() {
             if (categoryDistribution[tx.category] !== undefined) {
                 categoryDistribution[tx.category] += amt;
             } else {
+                if(!categoryDistribution['Misc']) categoryDistribution['Misc'] = 0;
                 categoryDistribution['Misc'] += amt;
             }
         }
@@ -79,11 +109,13 @@ function updateBudgetProgressBars(distributionData) {
 
     // Loop through limits to create matching view parameters
     Object.keys(budgetLimits).forEach(categoryKey => {
+        // Skip rendering if category has been custom deleted or doesn't map out
+        if (!customCategories.includes(categoryKey) || categoryKey === 'Salary') return;
+
         const spent = distributionData[categoryKey] || 0;
         const limitMax = budgetLimits[categoryKey];
         const percentage = Math.min((spent / limitMax) * 100, 100);
 
-        // Determine critical alert styling metrics classes
         let trackColor = 'bg-indigo-600';
         if (percentage >= 90) {
             trackColor = 'bg-rose-500';
@@ -142,16 +174,19 @@ function renderTransactionHistoryLogs() {
     lucide.createIcons();
 }
 
-// Fintech Chart Rendering (Line Graph Style)
+// Fintech Chart Rendering (Line Graph Style — Dynamic Extraction)
 function refreshFintechCharts(distributionData) {
     const canvas = document.getElementById('categoryChart');
     if(!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const labels = ['Shopping', 'Food', 'Rent', 'Entertainment', 'Miscellaneous'];
-    const dataPoints = [distributionData.Shopping, distributionData.Food, distributionData.Rent, distributionData.Entertainment, distributionData.Misc];
+    
+    // Filter out Salary revenue vector out of expenditure graphs line maps
+    const chartLabels = customCategories.filter(c => c !== 'Salary');
+    const dataPoints = chartLabels.map(label => distributionData[label] || 0);
 
     if (categoryChart) {
+        categoryChart.data.labels = chartLabels;
         categoryChart.data.datasets[0].data = dataPoints;
         categoryChart.update();
         return;
@@ -160,7 +195,7 @@ function refreshFintechCharts(distributionData) {
     categoryChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
+            labels: chartLabels,
             datasets: [{
                 data: dataPoints,
                 borderColor: '#4F46E5',
@@ -231,6 +266,33 @@ if (budgetForm) {
     });
 }
 
+// CATEGORY REGISTRY LOGIC COUPLING OBSERVER
+const categoryForm = document.getElementById('categoryForm');
+if (categoryForm) {
+    categoryForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const inputEl = document.getElementById('newCategoryName');
+        const nodeName = inputEl.value.trim();
+
+        // Prevent duplicate nodes tracking failures inside arrays
+        if (nodeName && !customCategories.includes(nodeName)) {
+            customCategories.push(nodeName);
+            // Assign baseline constraint threshold for the new node vector parameters
+            budgetLimits[nodeName] = 500; 
+
+            localStorage.setItem('nexus_categories', JSON.stringify(customCategories));
+            localStorage.setItem('nexus_limits', JSON.stringify(budgetLimits));
+
+            renderCategoryDropdowns();
+            processFinancialTelemetry();
+            categoryForm.reset();
+            alert(`Category Node "${nodeName}" deployed successfully to the ledger configuration matrices!`);
+        } else {
+            alert("Node parameters allocation failure: Category node already configured.");
+        }
+    });
+}
+
 window.wipeRecord = function(id) {
     transactions = transactions.filter(t => t.id !== id);
     commitState();
@@ -283,7 +345,7 @@ navLinks.forEach(link => {
 
 // Boot Initializer Hook
 document.addEventListener('DOMContentLoaded', () => {
-    lucide.createIcons();
+    renderCategoryDropdowns();
     processFinancialTelemetry();
     renderTransactionHistoryLogs();
 });
