@@ -53,9 +53,9 @@ function calculateMetrics() {
     const netSavings = incomeSum - expenseSum;
 
     // Numerical Formatting Injection
-    totalBalanceEl.innerText = `$${netSavings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    totalIncomeEl.innerText = `$${incomeSum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    totalExpensesEl.innerText = `$${expenseSum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if(totalBalanceEl) totalBalanceEl.innerText = `$${netSavings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if(totalIncomeEl) totalIncomeEl.innerText = `$${incomeSum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if(totalExpensesEl) totalExpensesEl.innerText = `$${expenseSum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     // Text Summary Label Injection
     Object.keys(categoryDistribution).forEach(cat => {
@@ -69,9 +69,9 @@ function calculateMetrics() {
 }
 
 function renderTableLogs() {
+    if(!transactionTableBody) return;
     transactionTableBody.innerHTML = '';
     
-    // Show newest transactions first
     const itemsToRender = [...transactions].reverse();
 
     itemsToRender.forEach(tx => {
@@ -94,7 +94,7 @@ function renderTableLogs() {
                 ${amountPrefix}$${parseFloat(tx.amount).toFixed(2)}
             </td>
             <td class="p-4 text-center">
-                <button onclick="deleteRecord(${tx.id})" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition duration-200">
+                <button onclick="deleteRecord(${tx.id})" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition duration-200 cursor-pointer">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
             </td>
@@ -104,10 +104,11 @@ function renderTableLogs() {
     lucide.createIcons();
 }
 
-// ChartJS Graph Update Hook
 function refreshVisualCharts(distributionData) {
-    const ctx = document.getElementById('categoryChart').getContext('2d');
+    const chartCanvas = document.getElementById('categoryChart');
+    if(!chartCanvas) return;
     
+    const ctx = chartCanvas.getContext('2d');
     const labelMapping = ['Shopping', 'Food', 'Rent & Utilities', 'Entertainment', 'Miscellaneous'];
     const numericalPayload = [
         distributionData.Shopping,
@@ -131,11 +132,7 @@ function refreshVisualCharts(distributionData) {
                 label: 'Expenses Volume ($)',
                 data: numericalPayload,
                 backgroundColor: [
-                    'rgba(79, 70, 229, 0.85)',  // Indigo
-                    'rgba(16, 185, 129, 0.85)', // Emerald
-                    'rgba(245, 158, 11, 0.85)', // Amber
-                    'rgba(239, 68, 68, 0.85)',   // Rose
-                    'rgba(100, 116, 139, 0.85)' // Slate
+                    'rgba(79, 70, 229, 0.85)', 'rgba(16, 185, 129, 0.85)', 'rgba(245, 158, 11, 0.85)', 'rgba(239, 68, 68, 0.85)', 'rgba(100, 116, 139, 0.85)'
                 ],
                 borderRadius: 8,
                 borderSkipped: false
@@ -144,28 +141,18 @@ function refreshVisualCharts(distributionData) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
+            plugins: { legend: { display: false } },
             scales: {
-                y: {
-                    grid: { color: '#F1F5F9' },
-                    ticks: { color: '#94A3B8', font: { weight: '600', size: 11 } },
-                    border: { dash: [5, 5] }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: '#64748B', font: { weight: '600', size: 12 } }
-                }
+                y: { grid: { color: '#F1F5F9' }, ticks: { color: '#94A3B8', font: { weight: '600', size: 11 } }, border: { dash: [5, 5] } },
+                x: { grid: { display: false }, ticks: { color: '#64748B', font: { weight: '600', size: 12 } } }
             }
         }
     });
 }
 
-// Transaction Ledger Mutators
+// Transaction Form Handling
 transactionForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    
     const newTx = {
         id: Date.now(),
         title: document.getElementById('txTitle').value,
@@ -174,7 +161,6 @@ transactionForm.addEventListener('submit', (e) => {
         category: document.getElementById('txCategory').value,
         date: document.getElementById('txDate').value
     };
-
     transactions.push(newTx);
     commitStateToMemory();
     closeModal();
@@ -194,6 +180,47 @@ function commitStateToMemory() {
 function escapeHtml(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
+
+// ==========================================
+// NEW ROUTE ROUTINE: CLIENT SIDE TAB LOGIC
+// ==========================================
+const navLinks = document.querySelectorAll('.nav-link');
+const tabContents = document.querySelectorAll('.tab-content');
+const pageTitle = document.getElementById('pageTitle');
+const pageSubtitle = document.getElementById('pageSubtitle');
+
+const metaHeaders = {
+    dashboard: { title: "Financial Dashboard", subtitle: "Welcome back! Tracking your live spending parameters." },
+    transactions: { title: "Transactions Ledger", subtitle: "Deep-dive history tracking files of your absolute expenses." },
+    budgets: { title: "Budget Constraints", subtitle: "Configure safety metrics thresholds to optimize savings parameters." },
+    settings: { title: "System Settings", subtitle: "Manage data structures, reset internal cache elements, and configure viewports." }
+};
+
+navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        const targetTab = link.getAttribute('data-tab');
+
+        // 1. Reset all links text appearance styling classes
+        navLinks.forEach(l => {
+            l.classList.remove('bg-indigo-50', 'text-indigo-600', 'font-semibold');
+            l.classList.add('text-slate-500', 'font-medium');
+        });
+        
+        // 2. Active highlights link treatment parameters 
+        link.classList.remove('text-slate-500', 'font-medium');
+        link.classList.add('bg-indigo-50', 'text-indigo-600', 'font-semibold');
+
+        // 3. Alternate visible section content frameworks
+        tabContents.forEach(content => content.classList.add('hidden'));
+        document.getElementById(`tab-${targetTab}`).classList.remove('hidden');
+
+        // 4. Transform main tracking header strings
+        if (metaHeaders[targetTab]) {
+            pageTitle.innerText = metaHeaders[targetTab].title;
+            pageSubtitle.innerText = metaHeaders[targetTab].subtitle;
+        }
+    });
+});
 
 // Initial Boot Hook
 document.addEventListener('DOMContentLoaded', () => {
