@@ -44,7 +44,7 @@
             </div>
         </aside>
 
-        <main class="flex-1 overflow-y-auto p-8 max-sm:p-4 flex flex-col justify-between">
+        <main class="flex-1 overflow-y-auto p-8 max-sm:p-4 window-wrapper flex flex-col justify-between">
             
             <header class="flex justify-between items-center mb-8">
                 <div>
@@ -59,11 +59,8 @@
             </header>
 
             <div id="tab-dashboard" class="tab-content space-y-6 flex-1">
-                
                 <div class="grid grid-cols-3 gap-6 max-2xl:grid-cols-1">
-                    
                     <div class="col-span-2 space-y-6">
-                        
                         <div class="grid grid-cols-3 gap-4 max-sm:grid-cols-1">
                             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs">
                                 <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Net Evaluation</p>
@@ -87,7 +84,7 @@
 
                         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs">
                             <div class="flex justify-between items-center mb-6">
-                                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider text-slate-400">Cashflow Analytics Matrix</h4>
+                                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Cashflow Analytics Matrix</h4>
                                 <div class="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
                                     <span class="w-2 h-2 rounded-full bg-indigo-600"></span> Allocation Weighting active
                                 </div>
@@ -96,17 +93,15 @@
                                 <canvas id="categoryChart"></canvas>
                             </div>
                         </div>
-
                     </div>
 
                     <div class="space-y-6">
-                        
                         <div class="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-6 rounded-2xl text-white shadow-xl shadow-indigo-100 border border-indigo-500/20 relative overflow-hidden flex flex-col justify-between h-48 group">
                             <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition duration-500"></div>
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-[10px] text-indigo-100 uppercase tracking-widest font-semibold">Nexus Premium Card</p>
-                                    <h4 class="text-lg font-bold mt-1">Pranjal Jaiswal</h4>
+                                    <h4 class="text-lg font-bold mt-1">Deeksha C A</h4>
                                 </div>
                                 <div class="w-8 h-6 bg-amber-400/80 rounded-sm opacity-80 shadow-xs border border-amber-300/30"></div>
                             </div>
@@ -139,11 +134,8 @@
                                 </button>
                             </div>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
             <div id="tab-transactions" class="tab-content hidden flex-1">
@@ -171,29 +163,40 @@
             </div>
 
             <div id="tab-budgets" class="tab-content hidden flex-1">
-                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs max-w-2xl">
-                    <h3 class="text-base font-bold text-slate-900 mb-1 uppercase tracking-wider">System Operational Limits</h3>
-                    <p class="text-sm text-slate-400 mb-6">Financial constraint parameters set across dynamic nodes.</p>
-                    <div class="space-y-6">
-                        <div>
-                            <div class="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                                <span>🛍️ Procurement Limits</span>
-                                <span id="budgetProgressText-Shopping" class="text-indigo-600">$0.00 / $1,000.00</span>
+                <div class="grid grid-cols-2 gap-8 max-xl:grid-cols-1 max-w-5xl">
+                    
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs h-fit">
+                        <h3 class="text-base font-bold text-slate-900 uppercase tracking-wider mb-1">Set Target Constraints</h3>
+                        <p class="text-sm text-slate-400 mb-5">Establish spending caps per transaction category node.</p>
+                        
+                        <form id="budgetForm" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Select Category Node</label>
+                                <select id="budgetCategory" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-hidden focus:border-indigo-500 transition">
+                                    <option value="Shopping">Shopping</option>
+                                    <option value="Food">Food</option>
+                                    <option value="Rent">Rent & Utilities</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Misc">Miscellaneous</option>
+                                </select>
                             </div>
-                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                <div id="budgetProgressBar-Shopping" class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Maximum Limit Threshold ($)</label>
+                                <input type="number" step="1" id="budgetAmount" required placeholder="e.g., 500" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
                             </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                                <span>🍔 Nutrition & Dining Threshold</span>
-                                <span id="budgetProgressText-Food" class="text-emerald-600">$0.00 / $500.00</span>
-                            </div>
-                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                <div id="budgetProgressBar-Food" class="bg-emerald-50 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-                            </div>
-                        </div>
+                            <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm py-3 rounded-xl transition cursor-pointer">
+                                Update Constraint Limit
+                            </button>
+                        </form>
                     </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs">
+                        <h3 class="text-base font-bold text-slate-900 mb-1 uppercase tracking-wider">Active Limits Runway</h3>
+                        <p class="text-sm text-slate-400 mb-6">Real-time expenditure matching against your configured thresholds.</p>
+                        <div class="space-y-6" id="budgetBarsContainer">
+                            </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -207,7 +210,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-sm font-semibold text-slate-800">Reset Local Memory Matrix</p>
-                            <p class="text-xs text-slate-400">Wipe all array data points recorded via browser storage parameters.</p>
+                            <p class="text-xs text-slate-400">Wipe all data points recorded via browser storage parameters.</p>
                         </div>
                         <button onclick="localStorage.clear(); location.reload();" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs px-4 py-2.5 rounded-xl transition cursor-pointer">
                             Clear Active Cache
